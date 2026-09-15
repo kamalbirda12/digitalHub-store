@@ -48,31 +48,30 @@ app.post("/api/admin/products",(req,res)=>{
 app.post("/api/admin/products", (req, res) => {
   const adminKey = req.headers["x-admin-key"];
 
-  if (!adminKey || adminKey !== ADMIN_PASSWORD) {
-    return res.status(401).json({ error: "Unauthorized" });
-  }
+if (!adminKey || adminKey !== ADMIN_PASSWORD) {
+  return res.status(401).json({ error: "Unauthorized" });
+}
 
-  const {name, cat, price, description, icon="📦"} = req.body || {};
+const {name, cat, price, description, icon="📦"} = req.body || {};
 
-  if (!name || !cat || !price) {
-    return res.status(400).json({
-      error: "name, category and price are required"
-    });
-  }
+if (!name || !cat || !price) {
+  return res.status(400).json({
+    error: "name, category and price are required"
+  });
+}
 
-  const p = {
-    id: Date.now(),
-    name,
-    cat,
-    price: Number(price),
-    description: description || "",
-    icon
-  };
+const p = {
+  id: Date.now(),
+  name,
+  cat,
+  price: Number(price),
+  description: description || "",
+  icon
+};
 
-  products.push(p);
-  res.status(201).json(p);
+products.push(p);
+res.status(201).json(p);
 });
-
 // Payment-provider webhook placeholder.
 // In production: verify the provider signature, mark order PAID,
 // then issue a short-lived download token.
