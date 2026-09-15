@@ -77,6 +77,7 @@ async function adminLogin(){
 
 function adminLogout(){
   sessionStorage.removeItem("adminLoggedIn");
+  sessionStorage.removeItem("adminKey");
   document.getElementById("adminPanel").style.display = "none";
   document.getElementById("adminLogin").style.display = "block";
 }
@@ -95,6 +96,9 @@ async function placeOrder(){let email=document.getElementById('email').value.tri
 let r=await fetch('/api/orders',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email,coupon,items:cart.map(p=>({id:p.id,price:p.price,qty:p.qty}))})}).then(x=>x.json());
 document.getElementById('result').textContent=r.error||`Order ${r.orderId} created. Total ₹${r.total}. Payment gateway connection is the next production step.`}
 async function addProduct(){let name=pn.value,cat=pc.value,price=pp.value,description=pd.value;if(!name||!cat||!price)return alert('Fill name, category and price');
-await fetch('/api/admin/products',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name,cat,price,description})});pn.value=pc.value=pp.value=pd.value='';await load();alert('Product added.')}
+await fetch('/api/admin/products',{method:'POST',headers:{
+  'Content-Type':'application/json',
+  'x-admin-key':sessionStorage.getItem('adminKey')
+},body:JSON.stringify({name,cat,price,description})});pn.value=pc.value=pp.value=pd.value='';await load();alert('Product added.')}
 load();
 </script></body></html>
