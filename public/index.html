@@ -51,7 +51,35 @@ footer{background:#111827;color:#aaa;text-align:center;padding:32px}@media(max-w
 <button onclick="placeOrder()">Create Order</button><p id="result"></p></div></div>
 <footer>© 2026 DigitalHub Store</footer>
 <script>
-let products=[],cart=[];
+async function adminLogin(){
+  const password = document.getElementById("adminPassword").value;
+  const msg = document.getElementById("loginMessage");
+
+  try {
+    const response = await fetch("/api/admin/login", {
+      method: "POST",
+      headers: {"Content-Type": "application/json"},
+      body: JSON.stringify({password})
+    });
+
+    if (response.ok) {
+      sessionStorage.setItem("adminLoggedIn", "true");
+      document.getElementById("adminLogin").style.display = "none";
+      document.getElementById("adminPanel").style.display = "block";
+    } else {
+      msg.textContent = "Wrong password";
+    }
+  } catch (error) {
+    msg.textContent = "Login error. Please try again.";
+  }
+}
+
+function adminLogout(){
+  sessionStorage.removeItem("adminLoggedIn");
+  document.getElementById("adminPanel").style.display = "none";
+  document.getElementById("adminLogin").style.display = "block";
+}
+  let products=[],cart=[];
 async function load(){products=await fetch('/api/products').then(r=>r.json());let cs=[...new Set(products.map(p=>p.cat))];document.getElementById('cat').innerHTML='<option>All</option>'+cs.map(c=>`<option>${c}</option>`).join('');render()}
 function render(){let q=document.getElementById('q').value.toLowerCase(),c=document.getElementById('cat').value;
 let list=products.filter(p=>(p.name.toLowerCase().includes(q)||p.cat.toLowerCase().includes(q))&&(c==='All'||p.cat===c));
