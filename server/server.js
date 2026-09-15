@@ -45,6 +45,32 @@ app.post("/api/admin/products",(req,res)=>{
   if(!name||!cat||!price) return res.status(400).json({error:"name, category and price are required"});
   const p={id:Date.now(),name,cat,price:Number(price),description:description||"",icon};
   products.push(p); res.status(201).json(p);
+app.post("/api/admin/products", (req, res) => {
+  const adminKey = req.headers["x-admin-key"];
+
+  if (!adminKey || adminKey !== ADMIN_PASSWORD) {
+    return res.status(401).json({ error: "Unauthorized" });
+  }
+
+  const {name, cat, price, description, icon="📦"} = req.body || {};
+
+  if (!name || !cat || !price) {
+    return res.status(400).json({
+      error: "name, category and price are required"
+    });
+  }
+
+  const p = {
+    id: Date.now(),
+    name,
+    cat,
+    price: Number(price),
+    description: description || "",
+    icon
+  };
+
+  products.push(p);
+  res.status(201).json(p);
 });
 
 // Payment-provider webhook placeholder.
