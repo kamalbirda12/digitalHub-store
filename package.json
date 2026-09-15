@@ -1,0 +1,7 @@
+{
+  "name":"digitalhub-store-v3",
+  "version":"1.0.0",
+  "private":true,
+  "scripts":{"start":"node server/server.js"},
+  "dependencies":{"express":"^4.21.2","cors":"^2.8.5"}
+}

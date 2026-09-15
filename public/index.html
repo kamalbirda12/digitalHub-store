@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>DigitalHub Store v3</title>
+<style>
+*{box-sizing:border-box}body{margin:0;font-family:Arial,sans-serif;background:#f6f7fb;color:#171827}
+header{background:#111827;color:#fff;padding:15px 5%;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;z-index:5}
+.logo{font-size:22px;font-weight:800}.logo b{color:#8b6cff}nav a{color:#ddd;text-decoration:none;margin:0 9px}
+.hero{padding:65px 5%;text-align:center;color:#fff;background:linear-gradient(135deg,#17142d,#5639ad)}
+.hero h1{font-size:clamp(36px,6vw,62px);margin:0 0 12px}.hero p{font-size:18px;color:#e5e0f2}
+.wrap{max-width:1200px;margin:auto;padding:42px 5%}h2{text-align:center;font-size:30px}
+.tools{display:flex;gap:10px;margin:20px 0}.tools input,.tools select,.checkout input,.admin input,.admin textarea,.admin select{padding:13px;border:1px solid #ddd;border-radius:9px;font-size:15px}.tools input{flex:1}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:18px}.card,.panel{background:#fff;border-radius:16px;box-shadow:0 5px 20px #0001;overflow:hidden}.thumb{height:145px;background:linear-gradient(135deg,#7c5cff,#20b8ad);display:grid;place-items:center;font-size:48px;color:white}.body{padding:18px}.tag{font-size:12px;color:#6958d7;font-weight:800}.price{font-size:21px;font-weight:800;margin:10px 0}
+button{border:0;border-radius:9px;padding:12px 17px;background:#7c5cff;color:white;font-weight:700;cursor:pointer}.secondary{background:#eee;color:#222}.cart{position:fixed;right:18px;bottom:18px;background:#7c5cff;color:#fff;border-radius:30px;padding:13px 18px;font-weight:800;cursor:pointer;z-index:8}
+.modal{display:none;position:fixed;inset:0;background:#0008;z-index:10;align-items:center;justify-content:center;padding:18px}.modal.show{display:flex}.box{background:#fff;padding:24px;border-radius:18px;max-width:560px;width:100%;max-height:90vh;overflow:auto}.close{float:right;font-size:25px;cursor:pointer}
+.row{display:flex;justify-content:space-between;gap:12px;padding:12px 0;border-bottom:1px solid #eee}.qty button{padding:5px 9px}.notice{background:#fff5d8;padding:12px;border-radius:9px;font-size:13px;margin:12px 0}
+.admin{background:#111827;color:#fff}.admin .panel{padding:22px;color:#171827}.admin input,.admin textarea,.admin select{width:100%;margin:6px 0 12px}.admin textarea{min-height:80px}
+footer{background:#111827;color:#aaa;text-align:center;padding:32px}@media(max-width:650px){nav{display:none}.tools{flex-direction:column}}
+</style></head><body>
+<header><div class="logo">Digital<b>Hub</b> Store</div><nav><a href="#products">Products</a><a href="#admin">Admin</a></nav></header>
+<section class="hero"><h1>Your Digital Store</h1><p>PDFs • E-books • AI Prompts • Canva • Templates • Courses</p><a href="#products"><button>Shop Now</button></a></section>
+<section class="wrap" id="products"><h2>Products</h2>
+<div class="tools"><input id="q" placeholder="Search..." oninput="render()"><select id="cat" onchange="render()"><option>All</option></select></div>
+<div class="grid" id="grid"></div></section>
+
+<section class="wrap admin" id="admin"><h2>Seller Admin</h2><div class="panel">
+<h3>Add product</h3><input id="pn" placeholder="Product name"><input id="pc" placeholder="Category">
+<input id="pp" type="number" placeholder="Price ₹"><textarea id="pd" placeholder="Description"></textarea>
+<button onclick="addProduct()">Add Product</button>
+<div class="notice">Starter admin has no login. Add authentication before deploying publicly.</div>
+</div></section>
+
+<div class="cart" onclick="openCart()">🛒 Cart <span id="count">0</span></div>
+<div class="modal" id="cartM"><div class="box"><span class="close" onclick="closeM('cartM')">×</span><h2>Your Cart</h2><div id="items"></div><h3 id="sum"></h3><button onclick="checkout()">Checkout</button></div></div>
+<div class="modal" id="checkoutM"><div class="box checkout"><span class="close" onclick="closeM('checkoutM')">×</span><h2>Checkout</h2>
+<input id="email" placeholder="Email address"><input id="coupon" placeholder="Coupon code (try SAVE10)">
+<div class="notice">This starter creates the order. Real payment must be connected and verified on the server before downloads are released.</div>
+<button onclick="placeOrder()">Create Order</button><p id="result"></p></div></div>
+<footer>© 2026 DigitalHub Store</footer>
+<script>
+let products=[],cart=[];
+async function load(){products=await fetch('/api/products').then(r=>r.json());let cs=[...new Set(products.map(p=>p.cat))];document.getElementById('cat').innerHTML='<option>All</option>'+cs.map(c=>`<option>${c}</option>`).join('');render()}
+function render(){let q=document.getElementById('q').value.toLowerCase(),c=document.getElementById('cat').value;
+let list=products.filter(p=>(p.name.toLowerCase().includes(q)||p.cat.toLowerCase().includes(q))&&(c==='All'||p.cat===c));
+document.getElementById('grid').innerHTML=list.map(p=>`<div class="card"><div class="thumb">${p.icon}</div><div class="body"><div class="tag">${p.cat}</div><h3>${p.name}</h3><p>${p.description}</p><div class="price">₹${p.price}</div><button onclick="add(${p.id})">Add to Cart</button> <button class="secondary" onclick="buy(${p.id})">Buy Now</button></div></div>`).join('')}
+function add(id){cart.push({...products.find(p=>p.id===id),qty:1});update();openCart()}
+function buy(id){cart=[{...products.find(p=>p.id===id),qty:1}];update();checkout()}
+function update(){document.getElementById('count').textContent=cart.reduce((s,p)=>s+p.qty,0)}
+function openCart(){document.getElementById('items').innerHTML=cart.length?cart.map((p,i)=>`<div class="row"><span>${p.name}<br><small>₹${p.price} × ${p.qty}</small></span><span class="qty"><button onclick="chg(${i},-1)">−</button> <button onclick="chg(${i},1)">+</button> <button onclick="del(${i})">×</button></span></div>`).join(''):'<p>Cart is empty.</p>';document.getElementById('sum').textContent='Total: ₹'+cart.reduce((s,p)=>s+p.price*p.qty,0);document.getElementById('cartM').classList.add('show')}
+function chg(i,n){cart[i].qty+=n;if(cart[i].qty<1)cart.splice(i,1);update();openCart()}function del(i){cart.splice(i,1);update();openCart()}
+function closeM(id){document.getElementById(id).classList.remove('show')}function checkout(){if(!cart.length)return alert('Cart is empty');closeM('cartM');document.getElementById('checkoutM').classList.add('show')}
+async function placeOrder(){let email=document.getElementById('email').value.trim(),coupon=document.getElementById('coupon').value.trim();if(!email)return alert('Enter email');
+let r=await fetch('/api/orders',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email,coupon,items:cart.map(p=>({id:p.id,price:p.price,qty:p.qty}))})}).then(x=>x.json());
+document.getElementById('result').textContent=r.error||`Order ${r.orderId} created. Total ₹${r.total}. Payment gateway connection is the next production step.`}
+async function addProduct(){let name=pn.value,cat=pc.value,price=pp.value,description=pd.value;if(!name||!cat||!price)return alert('Fill name, category and price');
+await fetch('/api/admin/products',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name,cat,price,description})});pn.value=pc.value=pp.value=pd.value='';await load();alert('Product added.')}
+load();
+</script></body></html>
