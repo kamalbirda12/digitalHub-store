@@ -2,57 +2,913 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width,initial-scale=1">
 <title>DigitalHub Store</title>
 
 <style>
 *{box-sizing:border-box}
-body{margin:0;font-family:Arial,sans-serif;background:#f5f7fb;color:#111}
-header{background:#111827;color:white;padding:22px;text-align:center}
-header h1{margin:0 0 8px}
-.wrap{max-width:1100px;margin:25px auto;padding:0 15px}
-.panel{background:white;padding:20px;border-radius:14px;margin-bottom:25px;box-shadow:0 3px 15px #0001}
-input,textarea,select{width:100%;padding:12px;margin:7px 0;border:1px solid #ddd;border-radius:8px}
-textarea{min-height:90px}
-button{border:0;padding:11px 16px;border-radius:8px;background:#111827;color:white;cursor:pointer;margin:5px 3px}
-button:hover{opacity:.85}
-.secondary{background:#555}
-.delete{background:#c62828}
-.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:18px}
-.card{background:white;border-radius:14px;overflow:hidden;box-shadow:0 3px 15px #0001}
-.thumb{font-size:55px;text-align:center;padding:25px;background:#eef2ff}
-.body{padding:18px}
-.tag{font-size:13px;color:#666}
-.price{font-size:22px;font-weight:bold;margin:12px 0}
-.notice{margin-top:10px;color:#555}
-.cart{background:#eef2ff;padding:15px;border-radius:10px;margin-top:15px}
-.hidden{display:none}
-footer{text-align:center;padding:30px;color:#666}
+html{scroll-behavior:smooth}
+body{
+margin:0;
+font-family:Arial,Helvetica,sans-serif;
+background:#f6f7fb;
+color:#171827
+}
+header{
+position:sticky;
+top:0;
+z-index:20;
+background:#111827;
+color:#fff;
+display:flex;
+align-items:center;
+justify-content:space-between;
+padding:16px 5%;
+box-shadow:0 3px 15px #0003
+}
+.logo{font-size:24px;font-weight:800}
+.logo b{color:#8b6cff}
+nav a{
+color:#ddd;
+text-decoration:none;
+margin-left:20px
+}
+nav a:hover{color:#fff}
+
+.hero{
+padding:80px 5%;
+text-align:center;
+color:#fff;
+background:linear-gradient(135deg,#17142d,#6042c5)
+}
+.hero h1{
+font-size:clamp(38px,7vw,70px);
+margin:0 0 15px
+}
+.hero p{
+font-size:19px;
+color:#e9e4f7;
+max-width:700px;
+margin:0 auto 25px
+}
+
+.btn{
+border:0;
+border-radius:10px;
+padding:12px 18px;
+background:#7c5cff;
+color:#fff;
+font-weight:700;
+cursor:pointer
+}
+.btn:hover{opacity:.88}
+.btn.gray{background:#eee;color:#222}
+.btn.red{background:#d62828}
+
+.wrap{
+max-width:1200px;
+margin:auto;
+padding:45px 5%
+}
+
+h2{text-align:center;font-size:32px}
+
+.tools{
+display:flex;
+gap:10px;
+margin:25px 0
+}
+.tools input,.tools select,
+.admin input,.admin textarea,.admin select,
+.checkout input{
+width:100%;
+padding:13px;
+border:1px solid #ddd;
+border-radius:9px;
+font-size:15px
+}
+.tools input{flex:1}
+
+.grid{
+display:grid;
+grid-template-columns:repeat(auto-fit,minmax(240px,1fr));
+gap:20px
+}
+
+.card{
+background:#fff;
+border-radius:16px;
+overflow:hidden;
+box-shadow:0 5px 20px #0001;
+transition:.2s
+}
+.card:hover{transform:translateY(-4px)}
+.thumb{
+height:160px;
+background:linear-gradient(135deg,#7c5cff,#20b8ad);
+display:grid;
+place-items:center;
+font-size:58px;
+color:#fff
+}
+.body{padding:19px}
+.tag{
+font-size:12px;
+color:#6958d7;
+font-weight:800;
+text-transform:uppercase
+}
+.body h3{margin:8px 0}
+.body p{color:#666;min-height:42px}
+.price{
+font-size:23px;
+font-weight:800;
+margin:12px 0
+}
+
+.categories{
+display:grid;
+grid-template-columns:repeat(auto-fit,minmax(140px,1fr));
+gap:12px;
+margin:25px 0
+}
+.category{
+background:#fff;
+padding:18px;
+border-radius:12px;
+text-align:center;
+box-shadow:0 3px 12px #0001;
+cursor:pointer
+}
+
+.cart{
+position:fixed;
+right:20px;
+bottom:20px;
+z-index:25;
+background:#7c5cff;
+color:#fff;
+border-radius:30px;
+padding:14px 20px;
+font-weight:800;
+cursor:pointer;
+box-shadow:0 5px 20px #0004
+}
+
+.modal{
+display:none;
+position:fixed;
+inset:0;
+background:#0008;
+z-index:50;
+align-items:center;
+justify-content:center;
+padding:18px
+}
+.modal.show{display:flex}
+.box{
+background:#fff;
+padding:25px;
+border-radius:18px;
+width:100%;
+max-width:600px;
+max-height:90vh;
+overflow:auto
+}
+.close{
+float:right;
+font-size:28px;
+cursor:pointer
+}
+
+.row{
+display:flex;
+justify-content:space-between;
+align-items:center;
+gap:10px;
+padding:14px 0;
+border-bottom:1px solid #eee
+}
+
+.admin{
+background:#111827;
+color:#fff;
+max-width:none
+}
+.admin-inner{
+max-width:1000px;
+margin:auto
+}
+.admin-panel{
+background:#fff;
+color:#171827;
+padding:24px;
+border-radius:16px
+}
+.admin textarea{min-height:90px}
+
+.admin-products{
+display:grid;
+gap:10px;
+margin-top:20px
+}
+.admin-product{
+display:flex;
+justify-content:space-between;
+align-items:center;
+gap:10px;
+padding:14px;
+background:#f5f5f5;
+border-radius:10px
+}
+
+.notice{
+background:#fff5d8;
+color:#4b3b00;
+padding:12px;
+border-radius:9px;
+margin:12px 0;
+font-size:13px
+}
+
+footer{
+background:#111827;
+color:#aaa;
+text-align:center;
+padding:35px
+}
+
+@media(max-width:650px){
+nav{display:none}
+.tools{flex-direction:column}
+.admin-product{flex-direction:column;align-items:flex-start}
+}
 </style>
 </head>
 
 <body>
 
 <header>
-<h1>🛍️ DigitalHub Store</h1>
-<p>Digital Products for Creators & Learners</p>
+<div class="logo">Digital<b>Hub</b> Store</div>
+
+<nav>
+<a href="#home">Home</a>
+<a href="#products">Products</a>
+<a href="#categories">Categories</a>
+<a href="#admin">Admin</a>
+</nav>
 </header>
 
-<div class="wrap">
+<section class="hero" id="home">
+<h1>Everything Digital. One Store.</h1>
+<p>
+Discover PDFs, e-books, AI prompts, Canva templates,
+YouTube resources, study materials and digital courses.
+</p>
+<a href="#products">
+<button class="btn">Explore Products</button>
+</a>
+</section>
 
-<div class="panel">
-<h2>🛒 Your Cart</h2>
-<div id="cart">Your cart is empty.</div>
-<button onclick="checkout()">Buy Cart Items</button>
+<section class="wrap" id="categories">
+<h2>Shop by Category</h2>
+
+<div class="categories">
+<div class="category" onclick="chooseCategory('E-books')">📚<br>E-books</div>
+<div class="category" onclick="chooseCategory('AI Prompts')">🤖<br>AI Prompts</div>
+<div class="category" onclick="chooseCategory('Canva Templates')">🎨<br>Canva</div>
+<div class="category" onclick="chooseCategory('Video Templates')">🎬<br>Video</div>
+<div class="category" onclick="chooseCategory('Study Materials')">📝<br>Study</div>
+<div class="category" onclick="chooseCategory('Courses')">💻<br>Courses</div>
+</div>
+</section>
+
+<section class="wrap" id="products">
+
+<h2>Our Products</h2>
+
+<div class="tools">
+<input id="q" placeholder="🔍 Search products..." oninput="render()">
+
+<select id="cat" onchange="render()">
+<option>All</option>
+</select>
 </div>
 
-<div class="panel">
+<div class="grid" id="grid"></div>
+
+</section>
+
+<section class="wrap admin" id="admin">
+
+<div class="admin-inner">
+
 <h2>🔐 Seller Admin</h2>
 
-<div id="adminLogin">
-<input id="adminPassword" type="password" placeholder="Enter admin password">
-<button onclick="adminLogin()">Login</button>
-<div id="loginMessage" class="notice"></div>
+<div id="adminLogin" class="admin-panel">
+
+<h3>Admin Login</h3>
+
+<input
+id="adminPassword"
+type="password"
+placeholder="Enter admin password"
+>
+
+<button class="btn" onclick="adminLogin()">
+Login
+</button>
+
+<p id="loginMessage"></p>
+
 </div>
 
-<div id="adminPanel" class="hidden">
+<div id="adminPanel" class="admin-panel" style="display:none">
+
+<h3>Add / Edit Product</h3>
+
+<input id="pn" placeholder="Product name">
+
+<input id="pc" placeholder="Category">
+
+<input id="pp" type="number" placeholder="Price ₹">
+
+<input id="pi" placeholder="Icon e.g. 🤖">
+
+<textarea id="pd" placeholder="Description"></textarea>
+
+<button class="btn" onclick="saveProduct()">
+Save Product
+</button>
+
+<button class="btn gray" onclick="clearForm()">
+Clear
+</button>
+
+<button class="btn gray" onclick="adminLogout()">
+Logout
+</button>
+
+<div class="notice">
+Only sell digital products that you own or are authorized to distribute.
+</div>
+
+<h3>Manage Products</h3>
+
+<div id="adminProducts" class="admin-products"></div>
+
+</div>
+
+</div>
+
+</section>
+
+<div class="cart" onclick="openCart()">
+🛒 Cart <span id="count">0</span>
+</div>
+
+<div class="modal" id="cartM">
+
+<div class="box">
+
+<span class="close" onclick="closeM('cartM')">×</span>
+
+<h2>Your Cart</h2>
+
+<div id="items"></div>
+
+<h3 id="sum">Total: ₹0</h3>
+
+<button class="btn" onclick="checkout()">
+Checkout
+</button>
+
+</div>
+
+</div>
+
+<div class="modal" id="checkoutM">
+
+<div class="box">
+
+<span class="close" onclick="closeM('checkoutM')">×</span>
+
+<h2>Checkout</h2>
+
+<input id="email" placeholder="Email address">
+
+<br><br>
+
+<input id="coupon" placeholder="Coupon code">
+
+<div class="notice">
+Payment gateway will be connected after the store setup is tested.
+</div>
+
+<button class="btn" onclick="placeOrder()">
+Create Order
+</button>
+
+<p id="result"></p>
+
+</div>
+
+</div>
+
+<footer>
+© 2026 DigitalHub Store
+<br><br>
+Digital Products • Templates • AI • Education
+</footer>
+
+<script>
+
+let products=[];
+let cart=[];
+let editingId=null;
+
+async function load(){
+
+try{
+
+const response=await fetch("/api/products");
+
+products=await response.json();
+
+const cats=[...new Set(products.map(p=>p.cat))];
+
+document.getElementById("cat").innerHTML=
+"<option>All</option>"+
+cats.map(c=>`<option>${escapeHtml(c)}</option>`).join("");
+
+render();
+renderAdminProducts();
+
+}catch(error){
+
+document.getElementById("grid").innerHTML=
+"<p>Unable to load products.</p>";
+
+}
+
+}
+
+function escapeHtml(text){
+
+return String(text)
+.replaceAll("&","&amp;")
+.replaceAll("<","&lt;")
+.replaceAll(">","&gt;")
+.replaceAll('"',"&quot;")
+.replaceAll("'","&#039;");
+
+}
+
+function render(){
+
+const q=document.getElementById("q").value.toLowerCase();
+const c=document.getElementById("cat").value;
+
+const list=products.filter(p=>
+(
+p.name.toLowerCase().includes(q) ||
+p.cat.toLowerCase().includes(q) ||
+(p.description||"").toLowerCase().includes(q)
+)
+&&
+(c==="All"||p.cat===c)
+);
+
+document.getElementById("grid").innerHTML=list.map(p=>`
+
+<div class="card">
+
+<div class="thumb">
+${escapeHtml(p.icon||"📦")}
+</div>
+
+<div class="body">
+
+<div class="tag">
+${escapeHtml(p.cat)}
+</div>
+
+<h3>${escapeHtml(p.name)}</h3>
+
+<p>${escapeHtml(p.description||"")}</p>
+
+<div class="price">
+₹${Number(p.price)}
+</div>
+
+<button class="btn" onclick="add(${p.id})">
+Add to Cart
+</button>
+
+<button class="btn gray" onclick="buy(${p.id})">
+Buy Now
+</button>
+
+</div>
+</div>
+
+`).join("");
+
+}
+
+function chooseCategory(category){
+
+document.getElementById("cat").value=category;
+document.getElementById("products").scrollIntoView();
+render();
+
+}
+
+function add(id){
+
+const p=products.find(x=>x.id===id);
+
+if(!p)return;
+
+const existing=cart.find(x=>x.id===id);
+
+if(existing){
+
+existing.qty++;
+
+}else{
+
+cart.push({...p,qty:1});
+
+}
+
+update();
+openCart();
+
+}
+
+function buy(id){
+
+cart=[];
+
+const p=products.find(x=>x.id===id);
+
+if(!p)return;
+
+cart.push({...p,qty:1});
+
+update();
+checkout();
+
+}
+
+function update(){
+
+document.getElementById("count").textContent=
+cart.reduce((s,p)=>s+p.qty,0);
+
+}
+
+function openCart(){
+
+const items=document.getElementById("items");
+
+if(!cart.length){
+
+items.innerHTML="<p>Your cart is empty.</p>";
+
+}else{
+
+items.innerHTML=cart.map((p,i)=>`
+
+<div class="row">
+
+<span>
+<strong>${escapeHtml(p.name)}</strong>
+<br>
+₹${p.price} × ${p.qty}
+</span>
+
+<span>
+
+<button class="btn gray" onclick="chg(${i},-1)">−</button>
+
+<button class="btn gray" onclick="chg(${i},1)">+</button>
+
+<button class="btn red" onclick="del(${i})">×</button>
+
+</span>
+
+</div>
+
+`).join("");
+
+}
+
+document.getElementById("sum").textContent=
+"Total: ₹"+
+cart.reduce((s,p)=>s+p.price*p.qty,0);
+
+document.getElementById("cartM").classList.add("show");
+
+}
+
+function chg(i,n){
+
+cart[i].qty+=n;
+
+if(cart[i].qty<1){
+
+cart.splice(i,1);
+
+}
+
+update();
+openCart();
+
+}
+
+function del(i){
+
+cart.splice(i,1);
+
+update();
+openCart();
+
+}
+
+function closeM(id){
+
+document.getElementById(id).classList.remove("show");
+
+}
+
+function checkout(){
+
+if(!cart.length){
+
+alert("Cart is empty");
+return;
+
+}
+
+closeM("cartM");
+
+document.getElementById("checkoutM").classList.add("show");
+
+}
+
+async function placeOrder(){
+
+const email=document.getElementById("email").value.trim();
+const coupon=document.getElementById("coupon").value.trim();
+
+if(!email){
+
+alert("Enter email");
+return;
+
+}
+
+const response=await fetch("/api/orders",{
+
+method:"POST",
+
+headers:{
+"Content-Type":"application/json"
+},
+
+body:JSON.stringify({
+
+email,
+coupon,
+items:cart.map(p=>({
+id:p.id,
+price:p.price,
+qty:p.qty
+}))
+
+})
+
+});
+
+const data=await response.json();
+
+document.getElementById("result").textContent=
+data.error||
+`Order ${data.orderId} created. Total ₹${data.total}.`;
+
+}
+
+async function adminLogin(){
+
+const password=
+document.getElementById("adminPassword").value;
+
+const response=await fetch("/api/admin/login",{
+
+method:"POST",
+
+headers:{
+"Content-Type":"application/json"
+},
+
+body:JSON.stringify({password})
+
+});
+
+if(response.ok){
+
+sessionStorage.setItem("adminLoggedIn","true");
+sessionStorage.setItem("adminKey",password);
+
+document.getElementById("adminLogin").style.display="none";
+document.getElementById("adminPanel").style.display="block";
+
+renderAdminProducts();
+
+}else{
+
+document.getElementById("loginMessage").textContent=
+"Wrong password.";
+
+}
+
+}
+
+function adminLogout(){
+
+sessionStorage.removeItem("adminLoggedIn");
+sessionStorage.removeItem("adminKey");
+
+document.getElementById("adminPanel").style.display="none";
+document.getElementById("adminLogin").style.display="block";
+
+}
+
+function clearForm(){
+
+editingId=null;
+
+document.getElementById("pn").value="";
+document.getElementById("pc").value="";
+document.getElementById("pp").value="";
+document.getElementById("pi").value="";
+document.getElementById("pd").value="";
+
+}
+
+async function saveProduct(){
+
+const name=document.getElementById("pn").value.trim();
+const cat=document.getElementById("pc").value.trim();
+const price=document.getElementById("pp").value;
+const icon=document.getElementById("pi").value.trim()||"📦";
+const description=document.getElementById("pd").value.trim();
+
+if(!name||!cat||!price){
+
+alert("Fill name, category and price.");
+return;
+
+}
+
+const url=editingId
+?"/api/admin/products/"+editingId
+:"/api/admin/products";
+
+const method=editingId?"PUT":"POST";
+
+const response=await fetch(url,{
+
+method,
+
+headers:{
+"Content-Type":"application/json",
+"x-admin-key":sessionStorage.getItem("adminKey")
+},
+
+body:JSON.stringify({
+name,
+cat,
+price,
+icon,
+description
+})
+
+});
+
+if(response.ok){
+
+alert(editingId?"Product updated!":"Product added!");
+
+clearForm();
+await load();
+
+}else{
+
+const data=await response.json().catch(()=>({}));
+
+alert(data.error||"Operation failed.");
+
+}
+
+}
+
+function renderAdminProducts(){
+
+if(sessionStorage.getItem("adminLoggedIn")!=="true")return;
+
+document.getElementById("adminProducts").innerHTML=
+products.map(p=>`
+
+<div class="admin-product">
+
+<div>
+<strong>${escapeHtml(p.name)}</strong>
+<br>
+₹${p.price} • ${escapeHtml(p.cat)}
+</div>
+
+<div>
+
+<button class="btn gray"
+onclick="editProduct(${p.id})">
+Edit
+</button>
+
+<button class="btn red"
+onclick="deleteProduct(${p.id})">
+Delete
+</button>
+
+</div>
+
+</div>
+
+`).join("");
+
+}
+
+function editProduct(id){
+
+const p=products.find(x=>x.id===id);
+
+if(!p)return;
+
+editingId=id;
+
+document.getElementById("pn").value=p.name;
+document.getElementById("pc").value=p.cat;
+document.getElementById("pp").value=p.price;
+document.getElementById("pi").value=p.icon||"📦";
+document.getElementById("pd").value=p.description||"";
+
+document.getElementById("admin").scrollIntoView();
+
+}
+
+async function deleteProduct(id){
+
+const p=products.find(x=>x.id===id);
+
+if(!p)return;
+
+if(!confirm("Delete "+p.name+"?"))return;
+
+const response=await fetch(
+"/api/admin/products/"+id,
+{
+method:"DELETE",
+headers:{
+"x-admin-key":sessionStorage.getItem("adminKey")
+}
+}
+);
+
+if(response.ok){
+
+alert("Product deleted!");
+await load();
+
+}else{
+
+alert("Delete failed.");
+
+}
+
+}
+
+if(sessionStorage.getItem("adminLoggedIn")==="true"){
+
+document.getElementById("adminLogin").style.display="none";
+document.getElementById("adminPanel").style.display="block";
+
+}
+
+load();
+
+</script>
+
+</body>
+</html>
