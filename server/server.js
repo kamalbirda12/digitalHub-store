@@ -4,7 +4,20 @@ const path=require("path");
 const app=express();
 app.use(cors()); app.use(express.json());
 app.use(express.static(path.join(__dirname,"../public")));
+const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD;
 
+app.post("/api/admin/login", (req, res) => {
+  const { password } = req.body;
+
+  if (password && password === ADMIN_PASSWORD) {
+    return res.json({ success: true });
+  }
+
+  res.status(401).json({
+    success: false,
+    message: "Invalid password"
+  });
+});
 let products=[
 {id:1,name:"AI Prompt Pack — 1000 Prompts",cat:"AI Prompts",price:199,icon:"🤖",description:"A starter collection of useful AI prompts for creators."},
 {id:2,name:"YouTube Shorts Template Pack",cat:"Video Templates",price:299,icon:"🎬",description:"Editable short-video template ideas for creators."},
