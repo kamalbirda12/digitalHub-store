@@ -64,6 +64,7 @@ async function adminLogin(){
 
     if (response.ok) {
       sessionStorage.setItem("adminLoggedIn", "true");
+      sessionStorage.setItem("adminKey", password);
       document.getElementById("adminLogin").style.display = "none";
       document.getElementById("adminPanel").style.display = "block";
     } else {
