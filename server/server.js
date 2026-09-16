@@ -1,6 +1,8 @@
 const express = require("express");
 const cors = require("cors");
 const path = require("path");
+const multer = require("multer");
+const fs = require("fs");
 
 const app = express();
 
@@ -10,6 +12,50 @@ app.use(express.json());
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD;
 
 app.use(express.static(path.join(__dirname, "../public")));
+
+/* =========================
+   PDF UPLOAD SETUP
+========================= */
+
+const uploadDir = path.join(__dirname, "../uploads");
+
+if (!fs.existsSync(uploadDir)) {
+  fs.mkdirSync(uploadDir, { recursive: true });
+}
+
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, uploadDir);
+  },
+
+  filename: (req, file, cb) => {
+    const safeName = Date.now() + "-" +
+      file.originalname.replace(/[^a-zA-Z0-9._-]/g, "_");
+
+    cb(null, safeName);
+  }
+});
+
+const upload = multer({
+  storage: storage,
+
+  limits: {
+    fileSize: 20 * 1024 * 1024
+  },
+
+  fileFilter: (req, file, cb) => {
+
+    if (file.mimetype !== "application/pdf") {
+      return cb(new Error("Only PDF files are allowed."));
+    }
+
+    cb(null, true);
+  }
+});
+
+/* =========================
+   PRODUCTS
+========================= */
 
 let products = [
   {
@@ -62,6 +108,10 @@ let products = [
   }
 ];
 
+/* =========================
+   ADMIN LOGIN
+========================= */
+
 app.post("/api/admin/login", (req, res) => {
 
   const { password } = req.body || {};
@@ -83,11 +133,17 @@ app.post("/api/admin/login", (req, res) => {
 
 });
 
+/* =========================
+   GET PRODUCTS
+========================= */
+
 app.get("/api/products", (req, res) => {
-
   res.json(products);
-
 });
+
+/* =========================
+   ADMIN CHECK
+========================= */
 
 function checkAdmin(req, res, next) {
 
@@ -106,8 +162,38 @@ function checkAdmin(req, res, next) {
   }
 
   next();
-
 }
+
+/* =========================
+   PDF UPLOAD
+========================= */
+
+app.post(
+  "/api/admin/upload-pdf",
+  checkAdmin,
+  upload.single("pdf"),
+  (req, res) => {
+
+    if (!req.file) {
+
+      return res.status(400).json({
+        error: "PDF file is required."
+      });
+
+    }
+
+    res.json({
+      success: true,
+      filename: req.file.filename,
+      message: "PDF uploaded successfully."
+    });
+
+  }
+);
+
+/* =========================
+   ADD PRODUCT
+========================= */
 
 app.post("/api/admin/products", checkAdmin, (req, res) => {
 
@@ -116,10 +202,11 @@ app.post("/api/admin/products", checkAdmin, (req, res) => {
     cat,
     price,
     icon = "📦",
-    description = ""
+    description = "",
+    pdf = ""
   } = req.body || {};
 
-  if (!name || !cat || !price) {
+  if (!name || !cat || price === undefined) {
 
     return res.status(400).json({
       error: "name, category and price are required"
@@ -139,7 +226,9 @@ app.post("/api/admin/products", checkAdmin, (req, res) => {
 
     icon,
 
-    description
+    description,
+
+    pdf
 
   };
 
@@ -148,6 +237,10 @@ app.post("/api/admin/products", checkAdmin, (req, res) => {
   res.status(201).json(product);
 
 });
+
+/* =========================
+   EDIT PRODUCT
+========================= */
 
 app.put("/api/admin/products/:id", checkAdmin, (req, res) => {
 
@@ -170,20 +263,34 @@ app.put("/api/admin/products/:id", checkAdmin, (req, res) => {
     cat,
     price,
     icon,
-    description
+    description,
+    pdf
   } = req.body || {};
 
   if (name) product.name = name;
   if (cat) product.cat = cat;
-  if (price) product.price = Number(price);
+
+  if (price !== undefined && price !== "") {
+    product.price = Number(price);
+  }
+
   if (icon) product.icon = icon;
+
   if (description !== undefined) {
     product.description = description;
+  }
+
+  if (pdf !== undefined) {
+    product.pdf = pdf;
   }
 
   res.json(product);
 
 });
+
+/* =========================
+   DELETE PRODUCT
+========================= */
 
 app.delete("/api/admin/products/:id", checkAdmin, (req, res) => {
 
@@ -209,6 +316,10 @@ app.delete("/api/admin/products/:id", checkAdmin, (req, res) => {
   });
 
 });
+
+/* =========================
+   ORDERS
+========================= */
 
 app.post("/api/orders", (req, res) => {
 
@@ -269,6 +380,10 @@ app.post("/api/orders", (req, res) => {
 
 });
 
+/* =========================
+   PAYMENT WEBHOOK
+========================= */
+
 app.post("/api/payment/webhook", (req, res) => {
 
   res.json({
@@ -278,6 +393,10 @@ app.post("/api/payment/webhook", (req, res) => {
   });
 
 });
+
+/* =========================
+   SECURE DOWNLOAD
+========================= */
 
 app.get("/download/:token", (req, res) => {
 
@@ -290,6 +409,28 @@ app.get("/download/:token", (req, res) => {
 
 });
 
+/* =========================
+   ERROR HANDLER
+========================= */
+
+app.use((err, req, res, next) => {
+
+  if (err) {
+
+    return res.status(400).json({
+      error: err.message || "Upload error"
+    });
+
+  }
+
+  next();
+
+});
+
+/* =========================
+   FRONTEND
+========================= */
+
 app.get("*", (req, res) => {
 
   res.sendFile(
@@ -300,6 +441,10 @@ app.get("*", (req, res) => {
   );
 
 });
+
+/* =========================
+   SERVER
+========================= */
 
 const PORT =
   process.env.PORT || 3000;
